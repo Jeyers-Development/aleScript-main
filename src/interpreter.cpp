@@ -1,0 +1,54 @@
+#include "interpreter.h"
+#include <fstream>
+#include <iostream>
+#include <sstream>
+#include <cctype>
+
+using namespace std;
+
+Interpreter::Interpreter() 
+    : lastReturned("NULL"), SPLAR('?'), pc(0), pcIgnore(0) 
+{
+    variables["EMPTY"] = "";
+    variables["ALE_VERSION"] = "v1.1";
+}
+
+
+bool Interpreter::loadProgram(const string& filename) {
+    ifstream file(filename);
+    if (!file) return false;
+
+    string line;
+    while (getline(file, line)) {
+        trim(line);
+        programLines.push_back(line);
+    }
+
+    return true;
+}
+
+void Interpreter::run() {
+    while (pc < (int)programLines.size()) {
+        string line = programLines[pc++];
+        if (line.empty() || line[0] == '#') continue;
+
+        executeLine(line);
+    }
+}
+
+
+vector<string> Interpreter::split(const string& line, char delimiter) {
+    vector<string> result;
+    stringstream ss(line);
+    string item;
+    while (getline(ss, item, delimiter)) {
+        trim(item);
+        result.push_back(item);
+    }
+    return result;
+}
+
+void Interpreter::trim(string& str) {
+    while (!str.empty() && isspace(str.front())) str.erase(str.begin());
+    while (!str.empty() && isspace(str.back())) str.pop_back();
+}
