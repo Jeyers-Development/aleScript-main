@@ -16,7 +16,8 @@ public:
 
     // Command handler declarations (needed for brews.cpp)
     void executeLine(const string& line);
-    void executePrint(const vector<string>& csline, bool endlB);
+    void executePrint(const vector<string>& csline);
+    void executePrintln(const vector<string>& csline);
     void executeVar(const vector<string>& csline);
     void executeBMath(const vector<string>& csline);
     void executeInput(const vector<string>& csline);

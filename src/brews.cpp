@@ -16,11 +16,11 @@ void Interpreter::executeLine(const std::string& line) {
 
     switch(hashStr(csline[0].c_str())) {
         case hashStr("print"): {
-            executePrint(csline,false);
+            executePrint(csline);
             break;
         }
         case hashStr("println"): {
-            executePrint(csline,true);
+            executePrintln(csline);
             break;
         }
 
@@ -47,6 +47,8 @@ void Interpreter::executeLine(const std::string& line) {
             break;
         }
 
+        case hashStr("exit"): { exit(0); break; }
+
         default: {
             std::cerr << "Unknown command\n";
             break;
@@ -57,8 +59,6 @@ void Interpreter::executeLine(const std::string& line) {
 
 
 void Interpreter::executePrint(const vector<string>& csline) {
-    if (csline.size() < 2) break;
-
     const std::string &arg = csline[1];
     if (!arg.empty() && arg[0] == '"') {
         cout << arg.substr(1);
@@ -73,15 +73,13 @@ void Interpreter::executePrint(const vector<string>& csline) {
     }
 }
 
-void Interpreter::executePrintln(const vector<string>& csline, bool endlB) {
-    if (csline.size() < 2) break;
-
+void Interpreter::executePrintln(const vector<string>& csline) {
     const std::string &arg = csline[1];
     if (!arg.empty() && arg[0] == '"') {
         cout << arg.substr(1) << endl;
     } else {
-        auto it = gloVars.find(arg);
-        if (it != gloVars.end()) {
+        auto it = variables.find(arg);
+        if (it != variables.end()) {
             cout << it->second << endl;
     } else {
             cerr << "Variable '" << arg << "' not defined." << endl;
