@@ -132,9 +132,9 @@ void Interpreter::executeVar(const vector<string>& csline) {
 // bmath?<num1>?<operator>?<num2>
 void Interpreter::executeBMath(const vector<string>& csline) {
     if (csline.size() >= 4) {
-        float in1 = stof(getValue(csline[1]).c_str());
+        float in1 = strtof(getValue(csline[1]).c_str(), nullptr);
         string sign = getValue(csline[2]);
-        float in2 = stof(getValue(csline[3]).c_str());
+        float in2 = strtof(getValue(csline[3]).c_str(), nullptr);
         string sout = "INVALID_OPERATOR";
         float out = numeric_limits<float>::quiet_NaN();
 
