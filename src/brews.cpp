@@ -66,6 +66,11 @@ void Interpreter::executeLine(const string& line) {
             break;
         }
 
+        case hashStr("if"): {
+            executeIfStatement(csline);
+            break;
+        }
+
         case hashStr("exit"): { exit(0); break; }
 
         default: {
@@ -81,14 +86,19 @@ void Interpreter::executeLine(const string& line) {
 
 }
 
-
 void Interpreter::executePrint(const vector<string>& csline) {
-    if (csline.size() < 2) { cerr << pc << " ; Invalid \'print\' format" << endl; exit(0); }
+    if (csline.size() < 2) {
+        cerr << pc << " ; Invalid 'print' format" << endl;
+        exit(0);
+    }
     cout << getValue(csline[1]);
 }
 
 void Interpreter::executePrintln(const vector<string>& csline) {
-    if (csline.size() < 2) { cerr << pc << " ; Invalid \'println\' format" << endl; exit(0); }
+    if (csline.size() < 2) {
+        cerr << pc << " ; Invalid 'println' format" << endl;
+        exit(0);
+    }
     cout << getValue(csline[1]) << endl;
 }
 
@@ -106,30 +116,32 @@ void Interpreter::executeBMath(const vector<string>& csline) {
         float in1 = strtof(variables[csline[1]].c_str(), nullptr);
         string sign = variables[csline[2]];
         float in2 = strtof(variables[csline[3]].c_str(), nullptr);
-        float out = 0.0f;
+        string sout = "INVALID_OPERATOR";
+        float out = numeric_limits<float>::quiet_NaN();
 
         switch(hashStr(sign.c_str())) {
             case hashStr("+"): out = in1 + in2; break;
             case hashStr("-"): out = in1 - in2; break;
             case hashStr("*"): out = in1 * in2; break;
             case hashStr("/"): out = in1 / in2; break;
-            case hashStr("root"): out = pow(in1,1.0/in2); break;
-            case hashStr("powr"): out = pow(in1,in2); break;
-            default: cerr << "INVALID_OPERATOR" << endl; break;
+            case hashStr("root"): out = pow(in1, 1.0 / in2); break;
+            case hashStr("powr"): out = pow(in1, in2); break;
+            default: break;
         }
 
         ostringstream oss;
-        oss << out;
+        if (!isnan(out)) oss << out;
+        else oss << sout;
         lastReturned = oss.str();
     } else {
-        cerr << "Line " << pc << " ; Invalid \'bmath\' format." << endl;
+        cerr << "Line " << pc << " ; Invalid 'bmath' format." << endl;
         lastReturned = "BMATH_ERROR";
     }
 }
 
 void Interpreter::executeInput(const vector<string>& csline) {
-    if (csline.size() < 3) { cerr << "Line " << pc << " ; Invalid \'input\' format." << endl; exit(0); }
-    cout << csline[1];
+    if (csline.size() < 2) { cerr << "Line " << pc << " ; Invalid \'input\' format." << endl; exit(0); }
+    cout << getValue(csline[1]);
     getline(cin, lastReturned);
     if (lastReturned.empty()) {
         lastReturned = "";
@@ -169,9 +181,14 @@ void Interpreter::executeFWrite(const vector<string>& csline) {
 }
 
 void Interpreter::executeJoin(const vector<string>& csline) {
-    if (csline.size() < 3) cerr << "Line " << pc << " ; Invalid \'join\' format." << endl;
-    auto val = [this](const string &s){ return !s.empty() && s[0]=='"' ? s.substr(1) : variables[s]; };
-    lastReturned = val(csline[1]) + val(csline[2]);
+    if (csline.size() < 2) {
+        cerr << "Line " << pc << " ; Invalid 'join' format." << endl;
+        return;
+    }
+
+    lastReturned.clear();
+    for (size_t i = 1; i < csline.size(); ++i)
+        lastReturned += !csline[i].empty() && csline[i][0] == '"' ? csline[i].substr(1) : variables[csline[i]];
 }
 
 void Interpreter::executeSET_SPLAR(const vector<string>& csline) {
@@ -184,3 +201,29 @@ void Interpreter::executeSystem(const vector<string>& csline) {
     system(getValue(csline[1]).c_str());
 }
 
+
+//if?<in1>?<opr>?<in2>?<lines to move if false>
+void Interpreter::executeIfStatement(const vector<string>& csline) {
+    if (csline.size() < 2 || csline[1].empty()) cerr << "Line " << pc << " ; Invalid \'system\' format." << endl;
+
+    string in1 = getValue(csline[1]);
+    string in2 = getValue(csline[3]);
+    string opr = getValue(csline[2]);
+    int linesTM = stoi(getValue(csline[4]));
+    bool out = false;
+
+    switch (hashStr(opr.c_str())) {
+        case hashStr("=="): if (in1==in2)out=true; break;
+        case hashStr("!="): if (in1!=in2)out=true; break;
+        case hashStr(">"): if (stof(in1)>stof(in2))out=true; break;
+        case hashStr("<"): if (stof(in1)<stof(in2))out=true; break;
+        case hashStr(">="): if (stof(in1)>=stof(in2))out=true; break;
+        case hashStr("<="): if (stof(in1)<=stof(in2))out=true; break;
+        default: cerr << "Line " << pc << " ; Invalid \'if\' operator." << endl; break;
+    }
+    if (!out) {
+        pc = pc + linesTM;
+    }
+
+    lastReturned = out ? "true" : "false";
+}

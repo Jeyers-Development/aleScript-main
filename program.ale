@@ -1,10 +1,26 @@
-println?"program.ale
+println?"Calculator Made with AleScript
 
-join?ARG_PATH?"text.txt
-var?FilePath
-println?FilePath
+@REP_IGNORE
 
-fwrite?FilePath?"w?"Hello
+println?EMPTY
 
+input?"Number 1: ?
+var?num1
+input?"Operator: ?
+var?sign
+input?"Number 2: ?
+var?num2
 
-system?"echo hi
+bmath?num1?sign?num2
+var?out
+if?out?"==?"INVALID_OPERATOR?"4
+join?"'?sign?"' is an invalid operator! Available operators: ?HELP_BMATH_OPERATORS
+var?tempStr
+println?tempStr
+
+if?out?"!=?"INVALID_OPERATOR?"4
+join?num1?" ?sign?" ?num2?" = ?out
+var?out
+println?out
+
+@REP

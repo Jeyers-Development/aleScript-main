@@ -10,7 +10,7 @@ using namespace std;
 
 class Interpreter {
 public:
-    Interpreter(const std::string& programPath);
+    Interpreter(const string& programPath);
 
     bool loadProgram(const string& filename);
     void run();
@@ -26,8 +26,9 @@ public:
     void executeJoin(const vector<string>& csline);
     void executeSET_SPLAR(const vector<string>& csline);
     void executeSystem(const vector<string>& csline);
+    void executeIfStatement(const vector<string>& csline);
 
-    std::string getValue(const std::string& s) const {
+    string getValue(const string& s) const {
         if (!s.empty() && s.front() == '"') {
             return s.substr(1);
         } else {
@@ -35,7 +36,7 @@ public:
             if (it != variables.end()) {
                 return it->second;
             } else {
-                std::cerr << "Variable '" << s << "' is not declared." << std::endl;
+                cerr << "Variable '" << s << "' is not declared." << endl;
                 return "GETVALUE_ERROR";
             }
         }

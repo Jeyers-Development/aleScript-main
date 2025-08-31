@@ -17,6 +17,8 @@ Interpreter::Interpreter(const string& programPath)
     variables["EMPTY"] = "";
     variables["ALE_VERSION"] = "v1.1";
     variables["ARG_PATH"] = getDirectory(programPath);
+    variables["HELP_BMATH_OPERATORS"] = "+, -, *, /, sqrt, powr";
+    variables["HELP_IF_OPRS"] = "==, !=, >, <, >=, <=";
 }
 
 
@@ -48,7 +50,9 @@ vector<string> Interpreter::split(const string& line, char delimiter) {
     stringstream ss(line);
     string item;
     while (getline(ss, item, delimiter)) {
-        trim(item);
+        if (item.empty() || item.front() != '"') {
+            trim(item);
+        }
         result.push_back(item);
     }
     return result;
