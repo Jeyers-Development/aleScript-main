@@ -1,0 +1,10 @@
+println?"program.ale
+
+join?ARG_PATH?"text.txt
+var?FilePath
+println?FilePath
+
+fwrite?FilePath?"w?"Hello
+
+
+system?"echo hi

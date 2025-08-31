@@ -7,7 +7,7 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    Interpreter interpreter;
+    Interpreter interpreter(argv[1]);
     if (!interpreter.loadProgram(argv[1])) {
         std::cerr << "Could not load program: " << argv[1] << "\n";
         return 1;

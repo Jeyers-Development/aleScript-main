@@ -8,9 +8,10 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
-  "C:/Programming/aleScript-main/src/brews.cpp" "CMakeFiles/AleScript.dir/src/brews.cpp.obj" "gcc" "CMakeFiles/AleScript.dir/src/brews.cpp.obj.d"
-  "C:/Programming/aleScript-main/src/interpreter.cpp" "CMakeFiles/AleScript.dir/src/interpreter.cpp.obj" "gcc" "CMakeFiles/AleScript.dir/src/interpreter.cpp.obj.d"
-  "C:/Programming/aleScript-main/src/main.cpp" "CMakeFiles/AleScript.dir/src/main.cpp.obj" "gcc" "CMakeFiles/AleScript.dir/src/main.cpp.obj.d"
+  "/home/jacob/Programming/aleScript-main/src/brews.cpp" "CMakeFiles/alescript.dir/src/brews.cpp.o" "gcc" "CMakeFiles/alescript.dir/src/brews.cpp.o.d"
+  "/home/jacob/Programming/aleScript-main/src/interpreter.cpp" "CMakeFiles/alescript.dir/src/interpreter.cpp.o" "gcc" "CMakeFiles/alescript.dir/src/interpreter.cpp.o.d"
+  "/home/jacob/Programming/aleScript-main/src/main.cpp" "CMakeFiles/alescript.dir/src/main.cpp.o" "gcc" "CMakeFiles/alescript.dir/src/main.cpp.o.d"
+  "" "alescript" "gcc" "CMakeFiles/alescript.dir/link.d"
   )
 
 # Targets to which this target links which contain Fortran sources.

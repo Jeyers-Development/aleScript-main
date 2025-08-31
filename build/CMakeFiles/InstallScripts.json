@@ -1,7 +1,7 @@
 {
 	"InstallScripts" : 
 	[
-		"C:/Programming/aleScript-main/build/cmake_install.cmake"
+		"/home/jacob/Programming/aleScript-main/build/cmake_install.cmake"
 	],
 	"Parallel" : false
 }

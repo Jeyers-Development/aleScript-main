@@ -9,4 +9,4 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 file(GLOB_RECURSE SOURCE_FILES "src/*.cpp" "src/*.h")
 
 # Add an executable target using the found source files
-add_executable(AleScript ${SOURCE_FILES})
+add_executable(alescript ${SOURCE_FILES})

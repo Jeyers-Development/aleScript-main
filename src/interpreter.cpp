@@ -6,11 +6,17 @@
 
 using namespace std;
 
-Interpreter::Interpreter() 
+string getDirectory(const string& path) {
+    size_t pos = path.find_last_of("/\\");
+    return path.substr(0, pos + 1);
+}
+
+Interpreter::Interpreter(const string& programPath) 
     : lastReturned("NULL"), SPLAR('?'), pc(0), pcIgnore(0) 
 {
     variables["EMPTY"] = "";
     variables["ALE_VERSION"] = "v1.1";
+    variables["ARG_PATH"] = getDirectory(programPath);
 }
 
 

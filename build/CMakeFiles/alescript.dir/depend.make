@@ -1,2 +1,2 @@
-# Empty dependencies file for AleScript.
+# Empty dependencies file for alescript.
 # This may be replaced when dependencies are built.
