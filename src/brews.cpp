@@ -2,6 +2,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <fstream>
+#include <chrono>
 #include <string>
 #include <sstream>
 #include <cmath>
@@ -12,8 +13,10 @@ constexpr unsigned int hashStr(const char* str, unsigned int hash = 5381) {
 using namespace std;
 
 void Interpreter::executeLine(const string& line) {
+    variables["LAST_RETURNED"] = lastReturned;
+
     auto csline = split(line, SPLAR);
-    if (csline.empty()) exit(0);
+    if (csline.empty() || csline[0].rfind("//", 0) == 0) return;
 
     switch(hashStr(csline[0].c_str())) {
         case hashStr("print"): {
@@ -71,6 +74,21 @@ void Interpreter::executeLine(const string& line) {
             break;
         }
 
+        case hashStr("round"): {
+            executeRounding(csline);
+            break;
+        }
+
+        case hashStr("webget"): {
+            executeWebGet(csline);
+            break;
+        }
+
+        case hashStr("getfps"): {
+            executeGetFPS();
+            break;
+        }
+
         case hashStr("exit"): { exit(0); break; }
 
         default: {
@@ -78,7 +96,7 @@ void Interpreter::executeLine(const string& line) {
             if (it != extraBrews.end()) {
                 it->second(csline); // run the extra brew
             } else {
-                cerr << "Unknown command" << endl;
+                cerr << "Line " << pc << " ; Unknown grain > " << csline[0] << endl;
             }
             break;
         }
@@ -86,36 +104,37 @@ void Interpreter::executeLine(const string& line) {
 
 }
 
+// println?<"value/var>
 void Interpreter::executePrint(const vector<string>& csline) {
     if (csline.size() < 2) {
-        cerr << pc << " ; Invalid 'print' format" << endl;
+        cerr << "Line " << pc << " ; Invalid 'print' format" << endl;
         exit(0);
     }
     cout << getValue(csline[1]);
 }
 
+// println?<"value/var>
 void Interpreter::executePrintln(const vector<string>& csline) {
     if (csline.size() < 2) {
-        cerr << pc << " ; Invalid 'println' format" << endl;
+        cerr << "Line " << pc << " ; Invalid 'println' format" << endl;
         exit(0);
     }
     cout << getValue(csline[1]) << endl;
 }
 
-
+// var?<var name>?<var value>   ---   ?<var value> <-- Optional
 void Interpreter::executeVar(const vector<string>& csline) {
-    if (csline.size() < 2) { cerr << pc << " ; Invalid \'var\' format" << endl; exit(0); }
+    if (csline.size() < 2) { cerr << "Line " << pc << " ; Invalid \'var\' format" << endl; exit(0); }
 
     variables[csline[1]] = (csline.size() == 2) ? lastReturned : getValue(csline[2]);
 }
 
-
-
+// bmath?<num1>?<operator>?<num2>
 void Interpreter::executeBMath(const vector<string>& csline) {
     if (csline.size() >= 4) {
-        float in1 = strtof(variables[csline[1]].c_str(), nullptr);
-        string sign = variables[csline[2]];
-        float in2 = strtof(variables[csline[3]].c_str(), nullptr);
+        float in1 = stof(getValue(csline[1]).c_str());
+        string sign = getValue(csline[2]);
+        float in2 = stof(getValue(csline[3]).c_str());
         string sout = "INVALID_OPERATOR";
         float out = numeric_limits<float>::quiet_NaN();
 
@@ -139,6 +158,7 @@ void Interpreter::executeBMath(const vector<string>& csline) {
     }
 }
 
+// input?<texttoput>
 void Interpreter::executeInput(const vector<string>& csline) {
     if (csline.size() < 2) { cerr << "Line " << pc << " ; Invalid \'input\' format." << endl; exit(0); }
     cout << getValue(csline[1]);
@@ -148,6 +168,7 @@ void Interpreter::executeInput(const vector<string>& csline) {
     }
 }
 
+// @REP ; @REP_IGNORE
 void Interpreter::executeRep(bool type) {
     if (type) { // @REP
         pc = pcIgnore;
@@ -180,6 +201,7 @@ void Interpreter::executeFWrite(const vector<string>& csline) {
     }
 }
 
+// join?<var1>?<var2>? --> <more vars>?
 void Interpreter::executeJoin(const vector<string>& csline) {
     if (csline.size() < 2) {
         cerr << "Line " << pc << " ; Invalid 'join' format." << endl;
@@ -191,18 +213,31 @@ void Interpreter::executeJoin(const vector<string>& csline) {
         lastReturned += !csline[i].empty() && csline[i][0] == '"' ? csline[i].substr(1) : variables[csline[i]];
 }
 
+// @SET_SPLAR?<new SPLAR>
 void Interpreter::executeSET_SPLAR(const vector<string>& csline) {
     if (csline.size() < 2 || csline[1].empty()) cerr << "@SET_SPLAR requires a character argument" << endl;
     SPLAR = this->getValue(csline[1])[0];
 }
 
+// system?<command>
 void Interpreter::executeSystem(const vector<string>& csline) {
     if (csline.size() < 2 || csline[1].empty()) cerr << "Line " << pc << " ; Invalid \'system\' format." << endl;
     system(getValue(csline[1]).c_str());
 }
 
+// systemsil?<command>
+void Interpreter::executeSystemsil(const vector<string>& csline) {
+    std::string cmd = getValue(csline[1]);
+    #ifdef _WIN32
+        cmd += " > NUL 2>&1";
+    #else
+        cmd += " > /dev/null 2>&1";
+    #endif
+    system(cmd.c_str());
+}
 
-//if?<in1>?<opr>?<in2>?<lines to move if false>
+
+// if?<in1>?<opr>?<in2>?<lines to move if false>
 void Interpreter::executeIfStatement(const vector<string>& csline) {
     if (csline.size() < 2 || csline[1].empty()) cerr << "Line " << pc << " ; Invalid \'system\' format." << endl;
 
@@ -226,4 +261,47 @@ void Interpreter::executeIfStatement(const vector<string>& csline) {
     }
 
     lastReturned = out ? "true" : "false";
+}
+
+// round?<num>?<floor/ceil>
+void Interpreter::executeRounding(const vector<string>& csline) {
+    if (csline.size() < 3 || csline[1].empty()) cerr << "Line " << pc << " ; Invalid \'round\' format." << endl;
+
+    float num = stof(getValue(csline[1]));
+    string type = getValue(csline[2]);
+
+    if (type == "floor") lastReturned = to_string((int)floor(num));
+    else if (type == "ceil") lastReturned = to_string((int)ceil(num));
+    else lastReturned = "INVALID_ROUND_TYPE";
+}
+
+// webget?<url>?<path to save>
+void Interpreter::executeWebGet(const vector<string>& csline) {
+    std::string url = getValue(csline[1]);
+    std::string output = getValue(csline[2]);
+
+    #ifdef _WIN32
+        std::string command = "curl -s -o \"" + output + "\" \"" + url + "\"";
+    #else
+        std::string command = "wget -q -O \"" + output + "\" \"" + url + "\"";
+    #endif
+
+    system(command.c_str());
+}
+
+
+void Interpreter::executeGetFPS() {
+    using namespace std::chrono;
+
+    fpsFrames++;
+    auto now = high_resolution_clock::now();
+    duration<float> elapsed = now - fpsLastTime;
+
+    if (elapsed.count() >= 0.01f) {
+        lastFPS = fpsFrames / elapsed.count();
+        fpsFrames = 0;
+        fpsLastTime = now;
+    }
+
+    lastReturned = std::to_string(lastFPS);
 }

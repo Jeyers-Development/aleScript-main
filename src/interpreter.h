@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <chrono>
 #include <vector>
 #include <unordered_map>
 #include <functional> 
@@ -27,6 +28,10 @@ public:
     void executeSET_SPLAR(const vector<string>& csline);
     void executeSystem(const vector<string>& csline);
     void executeIfStatement(const vector<string>& csline);
+    void executeRounding(const vector<string>& csline);
+    void executeWebGet(const vector<string>& csline);
+    void executeSystemsil(const vector<string>& csline);
+    void executeGetFPS();
 
     string getValue(const string& s) const {
         if (!s.empty() && s.front() == '"') {
@@ -51,6 +56,9 @@ private:
     char SPLAR;
     int pc;
     int pcIgnore;
+    int fpsFrames = 0;
+    chrono::high_resolution_clock::time_point fpsLastTime = chrono::high_resolution_clock::now();
+    float lastFPS = 0.0f;
 
     vector<string> split(const string& line, char delimiter);
     void trim(string& str);
