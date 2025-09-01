@@ -15,7 +15,25 @@ string trim_quotes(const string &s) {
 
 // List of words for autocomplete
 vector<string> autocomplete_words = {
-    "function"
+    "EMPTY",
+    "ALE_VERSION",
+    "ARG_PATH",
+    "HELP_BMATH_OPERATORS",
+    "HELP_IF_OPRS",
+
+    "println",
+    "bmath",
+    "input",
+    "@REP_IGNORE",
+    "@REP",
+    "@SET_SPLAR",
+    "fwrite",
+    "join",
+    "system",
+    "round",
+    "webget",
+    "getFps",
+    "exit",
 };
 
 // Get last n characters of string
@@ -24,11 +42,18 @@ string last_n(const string &s, int n) {
     return s.substr(s.size() - n);
 }
 
-int main() {
-    cout << "Enter filepath: ";
+int main(int argc, char** argv) {
     string filename;
-    getline(cin, filename);
-    filename = trim_quotes(filename);
+
+    if (argc >= 2) {
+        // Use the first argument as filename
+        filename = argv[1];
+    } else {
+        // Ask for filename if none provided
+        cout << "Enter filepath: ";
+        getline(cin, filename);
+        filename = trim_quotes(filename);
+    }
 
     ifstream infile(filename);
     if (!infile.is_open()) { cerr << "Failed to open: " << filename << "\n"; return 1; }
@@ -45,23 +70,51 @@ int main() {
     int rows, cols;
     getmaxyx(stdscr, rows, cols);
 
+    int menu_rows = 2;
+    int visible_rows = rows - menu_rows;
+
+    int scroll = 0;
+
     while (true) {
-        for (int i = 0; i < rows - 2; ++i) {
-            move(i, 0); clrtoeol();
-            if (i < (int)lines.size()) printw("%s", lines[i].c_str());
+        clear();
+
+        // Draw menu
+        mvprintw(0, 0, "^O Save  ^X Exit   ^R Refresh   Arrows Move   Enter NewLine   Backspace Del   Tab Auto-indent");
+        mvprintw(1, 0, "<=-~-=-~-=-~-=-~-=-~-=-~-=-~-=-~-=-~->");
+
+        // Adjust scroll
+        if (y < scroll) scroll = y;
+        if (y >= scroll + visible_rows) scroll = y - visible_rows + 1;
+
+        // Draw visible file lines
+        for (int i = 0; i < visible_rows; ++i) {
+            int idx = i + scroll;
+            move(i + menu_rows, 0); clrtoeol();
+            if (idx < (int)lines.size()) printw("%s", lines[idx].c_str());
         }
 
-        move(rows - 2, 0); clrtoeol();
-        printw("^O Save   ^X Exit   Arrows Move   Enter NewLine   Backspace Del   Tab Smart");
-        move(y, x);
+        // Move cursor relative to scroll
+        move(y - scroll + menu_rows, x);
 
         int ch = getch();
-        if (ch == 24) break;                // Ctrl+X exit
+        if (ch == 24) break;                // Ctrl+X
         else if (ch == 15) {                // Ctrl+O save then exit
             ofstream outfile(filename);
             for (auto &l : lines) outfile << l << "\n";
-            move(rows - 1, 0); clrtoeol(); printw("File saved. Press any key..."); getch();
+            move(rows - 1, 0); clrtoeol();
+            printw("File saved. Press any key...");
+            getch();
             break;
+        }
+        else if (ch == 18) {                // Ctrl+R to refresh
+            #ifdef _WIN32
+                system("cls");
+            #elif defined(__unix__)
+                system("clear");
+            #endif
+            getmaxyx(stdscr, rows, cols);
+            resizeterm(rows, cols);
+            clear();
         }
         else if (ch == KEY_UP && y > 0) { y--; if (x > (int)lines[y].size()) x = lines[y].size(); }
         else if (ch == KEY_DOWN && y < (int)lines.size() - 1) { y++; if (x > (int)lines[y].size()) x = lines[y].size(); }
@@ -73,13 +126,12 @@ int main() {
         }
         else if (ch == '\n') { lines.insert(lines.begin() + y + 1, lines[y].substr(x)); lines[y] = lines[y].substr(0, x); y++; x = 0; }
         else if (ch == '\t') {
-            // Check last 3 letters for autocomplete
             string last3 = last_n(lines[y].substr(0, x), 3);
             bool did_autocomplete = false;
             if (last3.size() == 3) {
                 for (auto &word : autocomplete_words) {
                     if (word.substr(0, 3) == last3 && word.size() > 3) {
-                        string to_insert = word.substr(3); // rest of word
+                        string to_insert = word.substr(3);
                         lines[y].insert(x, to_insert);
                         x += to_insert.size();
                         did_autocomplete = true;
@@ -87,7 +139,7 @@ int main() {
                     }
                 }
             }
-            if (!did_autocomplete) {        // If no autocomplete, insert 4-space tab
+            if (!did_autocomplete) {
                 const int tabSize = 4;
                 lines[y].insert(x, tabSize, ' ');
                 x += tabSize;
@@ -95,6 +147,7 @@ int main() {
         }
         else if (isprint(ch)) { lines[y].insert(x, 1, ch); x++; }
     }
+
 
     endwin();
     return 0;
