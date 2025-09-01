@@ -63,5 +63,5 @@ private:
     vector<string> split(const string& line, char delimiter);
     void trim(string& str);
 
-    unordered_map<string, function<void(const vector<string>&)>> extraBrews;
+    unordered_map<string, function<void(const vector<string>&)>> extraGrains;
 };

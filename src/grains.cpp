@@ -92,9 +92,9 @@ void Interpreter::executeLine(const string& line) {
         case hashStr("exit"): { exit(0); break; }
 
         default: {
-            auto it = extraBrews.find(csline[0]);
-            if (it != extraBrews.end()) {
-                it->second(csline); // run the extra brew
+            auto it = extraGrains.find(csline[0]);
+            if (it != extraGrains.end()) {
+                it->second(csline);
             } else {
                 cerr << "Line " << pc << " ; Unknown grain > " << csline[0] << endl;
             }
