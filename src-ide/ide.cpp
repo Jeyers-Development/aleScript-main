@@ -1,13 +1,11 @@
 #include <ncurses.h>
-#include <sys/ioctl.h>
-#include <unistd.h>
 #include <fstream>
 #include <iostream>
 #include <vector>
 #include <string>
 #if defined(_WIN32)
 #include <windows.h>
-#elif defined(__unix__)
+#else
 #include <cstdlib>
 #endif
 
@@ -53,11 +51,6 @@ string last_n(const string &s, int n) {
 }
 
 int main(int argc, char** argv) {
-    #if defined(_WIN32)
-        HWND console = GetConsoleWindow();
-        ShowWindow(console, SW_MAXIMIZE);
-    #endif
-
     string filename;
 
     if (argc >= 2) {
@@ -101,7 +94,7 @@ int main(int argc, char** argv) {
 
         // Draw menu
         mvprintw(0, 0, "^O Save  ^X Exit   ^R Refresh   ^F Search   ^H Replace   n Next   r ReplaceOne   a ReplaceAll   Arrows Move");
-        mvprintw(1, 0, "<=-~-=-~-=-~-=-~-=-~-=-~-=-~-=-~-=-~->");
+        mvprintw(1, 0, "<=-~-=-~-=-~-=-~-=-~-=-~-=-~-=-~-=-~-=-~-=-~-=-~-=-~-=-~-=-~-=-~-=-~-=-~-=-~-=-~-=-~-=-~-=-~-=-~-=-~-=-~-=>");
 
         // Adjust scroll
         if (y < scroll) scroll = y;
