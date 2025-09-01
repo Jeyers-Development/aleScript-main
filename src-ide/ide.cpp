@@ -13,6 +13,17 @@ string trim_quotes(const string &s) {
     return s;
 }
 
+// List of words for autocomplete
+vector<string> autocomplete_words = {
+    "function"
+};
+
+// Get last n characters of string
+string last_n(const string &s, int n) {
+    if ((int)s.size() < n) return s;
+    return s.substr(s.size() - n);
+}
+
 int main() {
     cout << "Enter filepath: ";
     string filename;
@@ -41,12 +52,12 @@ int main() {
         }
 
         move(rows - 2, 0); clrtoeol();
-        printw("^O Save   ^X Exit   Arrows Move   Enter NewLine   Backspace Del   Tab Insert");
+        printw("^O Save   ^X Exit   Arrows Move   Enter NewLine   Backspace Del   Tab Smart");
         move(y, x);
 
         int ch = getch();
-        if (ch == 24) break;                  // Ctrl+X exit
-        else if (ch == 15) {                  // Ctrl+O save
+        if (ch == 24) break;                // Ctrl+X exit
+        else if (ch == 15) {                // Ctrl+O save then exit
             ofstream outfile(filename);
             for (auto &l : lines) outfile << l << "\n";
             move(rows - 1, 0); clrtoeol(); printw("File saved. Press any key..."); getch();
@@ -62,9 +73,25 @@ int main() {
         }
         else if (ch == '\n') { lines.insert(lines.begin() + y + 1, lines[y].substr(x)); lines[y] = lines[y].substr(0, x); y++; x = 0; }
         else if (ch == '\t') {
-            const int tabSize = 4;
-            lines[y].insert(x, tabSize, ' ');
-            x += tabSize;
+            // Check last 3 letters for autocomplete
+            string last3 = last_n(lines[y].substr(0, x), 3);
+            bool did_autocomplete = false;
+            if (last3.size() == 3) {
+                for (auto &word : autocomplete_words) {
+                    if (word.substr(0, 3) == last3 && word.size() > 3) {
+                        string to_insert = word.substr(3); // rest of word
+                        lines[y].insert(x, to_insert);
+                        x += to_insert.size();
+                        did_autocomplete = true;
+                        break;
+                    }
+                }
+            }
+            if (!did_autocomplete) {        // If no autocomplete, insert 4-space tab
+                const int tabSize = 4;
+                lines[y].insert(x, tabSize, ' ');
+                x += tabSize;
+            }
         }
         else if (isprint(ch)) { lines[y].insert(x, 1, ch); x++; }
     }
