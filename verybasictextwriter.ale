@@ -1,0 +1,23 @@
+println?"Very Basic Text Writer
+println?"^C to Stop Writing!
+println?EMPTY
+
+input?"File path> ?
+var?file
+fwrite?file?"r
+var?originalRead
+if?originalRead?"!=?file?"6
+println?"Previous Contents:
+println?originalRead
+input?"Erase previous contents (y/n)> ?
+var?eraseYN
+if?eraseYN?"==?"y?"1
+fwrite?file?"w?"
+
+
+@REP_IGNORE
+
+input?"> ?
+fwrite?file?"a?LAST_RETURNED
+
+@REP

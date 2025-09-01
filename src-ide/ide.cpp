@@ -29,6 +29,7 @@ vector<string> autocomplete_words = {
     "ARG_PATH",
     "HELP_BMATH_OPERATORS",
     "HELP_IF_OPRS",
+    "LAST_RETURNED",
 
     "println",
     "bmath",
@@ -67,7 +68,6 @@ int main(int argc, char** argv) {
         #else
             cout << "Ale IDE " << ide_version << endl;
         #endif
-        
         cout << "Enter filepath: ";
         getline(cin, filename);
         filename = trim_quotes(filename);
@@ -90,14 +90,17 @@ int main(int argc, char** argv) {
 
     int menu_rows = 2;
     int visible_rows = rows - menu_rows;
-
     int scroll = 0;
+
+    string search_query;
+    string replace_query;
+    int search_line = -1;
 
     while (true) {
         clear();
 
         // Draw menu
-        mvprintw(0, 0, "^O Save  ^X Exit   ^R Refresh   Arrows Move   Enter NewLine   Backspace Del   Tab Auto-indent");
+        mvprintw(0, 0, "^O Save  ^X Exit   ^R Refresh   ^F Search   ^H Replace   n Next   r ReplaceOne   a ReplaceAll   Arrows Move");
         mvprintw(1, 0, "<=-~-=-~-=-~-=-~-=-~-=-~-=-~-=-~-=-~->");
 
         // Adjust scroll
@@ -108,7 +111,24 @@ int main(int argc, char** argv) {
         for (int i = 0; i < visible_rows; ++i) {
             int idx = i + scroll;
             move(i + menu_rows, 0); clrtoeol();
-            if (idx < (int)lines.size()) printw("%s", lines[idx].c_str());
+            if (idx < (int)lines.size()) {
+                if (!search_query.empty() && idx == search_line) {
+                    // Highlight search match
+                    string &l = lines[idx];
+                    int pos = l.find(search_query);
+                    if (pos != string::npos) {
+                        printw("%.*s", pos, l.c_str());
+                        attron(A_REVERSE);
+                        printw("%.*s", (int)search_query.size(), l.c_str() + pos);
+                        attroff(A_REVERSE);
+                        printw("%s", l.c_str() + pos + search_query.size());
+                    } else {
+                        printw("%s", l.c_str());
+                    }
+                } else {
+                    printw("%s", lines[idx].c_str());
+                }
+            }
         }
 
         // Move cursor relative to scroll
@@ -133,6 +153,86 @@ int main(int argc, char** argv) {
             getmaxyx(stdscr, rows, cols);
             resizeterm(rows, cols);
             clear();
+        }
+        else if (ch == 6) { // Ctrl+F search
+            echo();
+            curs_set(1);
+            move(rows - 1, 0); clrtoeol();
+            printw("Search: ");
+            char buffer[256];
+            getnstr(buffer, 255);
+            noecho();
+            search_query = buffer;
+            search_line = -1;
+
+            // Find first match
+            for (int i = 0; i < (int)lines.size(); i++) {
+                size_t pos = lines[i].find(search_query);
+                if (pos != string::npos) {
+                    search_line = i;
+                    y = i;
+                    x = pos;
+                    break;
+                }
+            }
+        }
+        else if (ch == 8) { // Ctrl+H replace
+            echo();
+            curs_set(1);
+            move(rows - 1, 0); clrtoeol();
+            printw("Find: ");
+            char buffer1[256];
+            getnstr(buffer1, 255);
+            search_query = buffer1;
+
+            move(rows - 1, 0); clrtoeol();
+            printw("Replace with: ");
+            char buffer2[256];
+            getnstr(buffer2, 255);
+            replace_query = buffer2;
+            noecho();
+            search_line = -1;
+
+            // Jump to first match
+            for (int i = 0; i < (int)lines.size(); i++) {
+                size_t pos = lines[i].find(search_query);
+                if (pos != string::npos) {
+                    search_line = i;
+                    y = i;
+                    x = pos;
+                    break;
+                }
+            }
+        }
+        else if (ch == 'n' && !search_query.empty()) { // next result
+            int start = (search_line == -1) ? y : search_line + 1;
+            search_line = -1;
+            for (int i = start; i < (int)lines.size(); i++) {
+                size_t pos = lines[i].find(search_query);
+                if (pos != string::npos) {
+                    search_line = i;
+                    y = i;
+                    x = pos;
+                    break;
+                }
+            }
+        }
+        else if (ch == 'r' && !search_query.empty() && search_line != -1) { // replace one
+            size_t pos = lines[search_line].find(search_query, x);
+            if (pos != string::npos) {
+                lines[search_line].replace(pos, search_query.size(), replace_query);
+                x = pos + replace_query.size();
+            }
+        }
+        else if (ch == 'a' && !search_query.empty()) { // replace all
+            for (auto &l : lines) {
+                size_t pos = 0;
+                while ((pos = l.find(search_query, pos)) != string::npos) {
+                    l.replace(pos, search_query.size(), replace_query);
+                    pos += replace_query.size();
+                }
+            }
+            search_line = -1;
         }
         else if (ch == KEY_UP && y > 0) { y--; if (x > (int)lines[y].size()) x = lines[y].size(); }
         else if (ch == KEY_DOWN && y < (int)lines.size() - 1) { y++; if (x > (int)lines[y].size()) x = lines[y].size(); }
@@ -165,7 +265,6 @@ int main(int argc, char** argv) {
         }
         else if (isprint(ch)) { lines[y].insert(x, 1, ch); x++; }
     }
-
 
     endwin();
     return 0;
