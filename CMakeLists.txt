@@ -8,5 +8,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # Find all .cpp and .h files recursively in the current directory and subdirectories
 file(GLOB_RECURSE SOURCE_FILES "src/*.cpp" "src/*.h")
 
+
 # Add an executable target using the found source files
 add_executable(alescript ${SOURCE_FILES})

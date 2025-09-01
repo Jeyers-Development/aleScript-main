@@ -1,1 +1,1 @@
-/usr/bin/c++ -Wl,--dependency-file=CMakeFiles/alescript.dir/link.d CMakeFiles/alescript.dir/src/brews.cpp.o CMakeFiles/alescript.dir/src/interpreter.cpp.o CMakeFiles/alescript.dir/src/main.cpp.o -o alescript
+/usr/bin/c++ -Wl,--dependency-file=CMakeFiles/alescript.dir/link.d CMakeFiles/alescript.dir/src/brews.cpp.o CMakeFiles/alescript.dir/src/interpreter.cpp.o CMakeFiles/alescript.dir/src/main.cpp.o -o alescript  /usr/lib/libSDL3.so.0.2.20

@@ -128,6 +128,7 @@ alescript: CMakeFiles/alescript.dir/src/interpreter.cpp.o
 alescript: CMakeFiles/alescript.dir/src/main.cpp.o
 alescript: CMakeFiles/alescript.dir/build.make
 alescript: CMakeFiles/alescript.dir/compiler_depend.ts
+alescript: /usr/lib/libSDL3.so.0.2.20
 alescript: CMakeFiles/alescript.dir/link.txt
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/home/jacob/Programming/aleScript-main/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Linking CXX executable alescript"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/alescript.dir/link.txt --verbose=$(VERBOSE)
