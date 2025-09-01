@@ -1,3 +1,0 @@
-/home/jacob/Programming/aleScript-main/build/CMakeFiles/alescript.dir
-/home/jacob/Programming/aleScript-main/build/CMakeFiles/edit_cache.dir
-/home/jacob/Programming/aleScript-main/build/CMakeFiles/rebuild_cache.dir
