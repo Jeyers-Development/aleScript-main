@@ -2,7 +2,7 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "Build FlintforgeCPP",
+      "label": "Build AleScript",
       "type": "shell",
       "group": {
         "kind": "build",
@@ -18,8 +18,14 @@
       "command": "sh",
       "args": ["-c", "./Build.sh"],
       "windows": {
-        "command": "cmd",
-        "args": ["/c", "Build.bat"]
+        "command": "Build.bat",
+        "options": {
+          "cwd": "${workspaceFolder}",
+          "shell": {
+            "executable": "cmd.exe",
+            "args": ["/c"]
+          }
+        }
       }
     }
   ]

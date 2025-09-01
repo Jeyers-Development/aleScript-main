@@ -1,13 +1,26 @@
-cmake_minimum_required(VERSION 3.10) # Specify a minimum CMake version
-project(MyProject CXX) # Define the project name and language
+cmake_minimum_required(VERSION 3.10)
+project(alescript CXX)
 
-# Set the C++ standard
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Find all .cpp and .h files recursively in the current directory and subdirectories
 file(GLOB_RECURSE SOURCE_FILES "src/*.cpp" "src/*.h")
+file(GLOB_RECURSE SOURCEIDE_FILES "src-ide/*.cpp" "src-ide/*.h")
 
-
-# Add an executable target using the found source files
 add_executable(alescript ${SOURCE_FILES})
+add_executable(aleIDE ${SOURCEIDE_FILES})
+
+if (WIN32)
+	target_include_directories(aleIDE PRIVATE "C:/msys64/ucrt64/include/ncurses")
+	target_link_directories(aleIDE PRIVATE "C:/msys64/ucrt64/lib")
+	target_link_libraries(aleIDE PRIVATE ncursesw)
+else()
+	# Linux/macOS
+    find_package(Curses REQUIRED)
+    if(CURSES_FOUND)
+        target_include_directories(aleIDE PRIVATE ${CURSES_INCLUDE_DIRS})
+        target_link_libraries(aleIDE PRIVATE ${CURSES_LIBRARIES})
+    else()
+        message(FATAL_ERROR "ncurses not found on Linux/macOS.")
+    endif()
+endif()

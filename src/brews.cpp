@@ -6,7 +6,6 @@
 #include <string>
 #include <sstream>
 #include <cmath>
-#include <SDL3/SDL.h>
 
 constexpr unsigned int hashStr(const char* str, unsigned int hash = 5381) {
     return *str ? hashStr(str + 1, ((hash << 5) + hash) + *str) : hash;
