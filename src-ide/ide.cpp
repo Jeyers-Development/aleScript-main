@@ -1,10 +1,19 @@
 #include <ncurses.h>
+#include <sys/ioctl.h>
+#include <unistd.h>
 #include <fstream>
 #include <iostream>
 #include <vector>
 #include <string>
+#if defined(_WIN32)
+#include <windows.h>
+#elif defined(__unix__)
+#include <cstdlib>
+#endif
 
 using namespace std;
+
+const char* ide_version = "v1.1.0";
 
 // Remove surrounding quotes
 string trim_quotes(const string &s) {
@@ -43,13 +52,22 @@ string last_n(const string &s, int n) {
 }
 
 int main(int argc, char** argv) {
+    #if defined(_WIN32)
+        HWND console = GetConsoleWindow();
+        ShowWindow(console, SW_MAXIMIZE);
+    #endif
+
     string filename;
 
     if (argc >= 2) {
-        // Use the first argument as filename
         filename = argv[1];
     } else {
-        // Ask for filename if none provided
+        #if defined(__unix__)
+            cout << "Ale IDE " << ide_version << " - Maximize Window if Not Already!" << endl;
+        #else
+            cout << "Ale IDE " << ide_version << endl;
+        #endif
+        
         cout << "Enter filepath: ";
         getline(cin, filename);
         filename = trim_quotes(filename);
